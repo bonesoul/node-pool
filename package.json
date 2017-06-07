@@ -1,0 +1,18 @@
+{
+  "name": "hpool",
+  "version": "0.0.1",
+  "description": "hpool",
+  "main": "src/app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bonesoul/hpool.git"
+  },
+  "author": "",
+  "bugs": {
+    "url": "https://github.com/bonesoul/hpool/issues"
+  },
+  "homepage": "https://github.com/bonesoul/hpool#readme"
+}
