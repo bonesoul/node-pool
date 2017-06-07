@@ -1,2 +1,2 @@
-# hpool-server
-hpool-server
+# hypeserv
+the next gen mining pool server.
