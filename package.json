@@ -17,7 +17,13 @@
   "homepage": "https://github.com/bonesoul/hpool#readme",
   "dependencies": {
     "app-module-path": "^2.2.0",
+    "bluebird": "^3.5.0",
     "config": "^1.26.1",
+    "glob": "^7.1.2",
+    "glob-promise": "^3.1.0",
+    "js-yaml": "^3.8.4",
+    "lodash": "^4.17.4",
+    "mongoose": "^4.10.5",
     "pretty-error": "^2.1.0",
     "winston": "^2.3.1"
   }

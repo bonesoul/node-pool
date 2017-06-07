@@ -1,0 +1,12 @@
+# The default config that will be merged with the mode config [development, production, test].
+
+############################
+# Logging config.
+############################
+logging:
+  console: # console logging.
+    enabled: true # enable console log?
+    level: debug #  minimum log level.
+  file: # file logging.
+    enabled: true # enable loggin to file?
+    level: info # minimum log level.
