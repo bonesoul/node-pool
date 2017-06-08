@@ -1,0 +1,10 @@
+enabled: true
+name: dogecoin
+
+coin:
+  config: dogecoin
+  daemon:
+    host: 127.0.0.1
+    port: 19332,
+    user: testuser
+    password: testpass
