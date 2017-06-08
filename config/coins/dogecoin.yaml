@@ -1,0 +1,6 @@
+name: Dogecoin
+symbol: DOGE",
+algorithm: scrypt
+node:
+  magic: c0c0c0c0
+  testnetMagic: fcc1b7dc

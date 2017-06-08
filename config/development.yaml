@@ -1,0 +1,3 @@
+database:
+  mongodb:
+    name: hypeserv-development

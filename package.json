@@ -1,20 +1,20 @@
 {
-  "name": "hpool",
+  "name": "hypeserv",
   "version": "0.0.1",
-  "description": "hpool",
-  "main": "src/app.js",
+  "description": "hypeserv",
+  "main": "src/server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/bonesoul/hpool.git"
+    "url": "git+https://github.com/bonesoul/hypeserv.git"
   },
   "author": "",
   "bugs": {
-    "url": "https://github.com/bonesoul/hpool/issues"
+    "url": "https://github.com/bonesoul/hypeserv/issues"
   },
-  "homepage": "https://github.com/bonesoul/hpool#readme",
+  "homepage": "https://github.com/bonesoul/hypeserv#readme",
   "dependencies": {
     "app-module-path": "^2.2.0",
     "bluebird": "^3.5.0",

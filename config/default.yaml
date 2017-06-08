@@ -1,6 +1,15 @@
 # The default config that will be merged with the mode config [development, production, test].
 
 ############################
+# Database config.
+############################
+database:
+  mongodb: # mongodb config.
+    host: localhost  # the mongodb host.
+    name: hypserv-default # the mongodb database name
+    debug: false # should we enable mongoose debugging
+
+############################
 # Logging config.
 ############################
 logging:

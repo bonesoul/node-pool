@@ -1,5 +1,5 @@
 //
-//     hpool
+//     hypeserv
 //     Copyright (C) 2013 - 2017, Hüseyin Uslu, Int6ware - http://www.int6ware.com
 //
 'use strict';
@@ -36,6 +36,10 @@ async function startup () {
     // ========================================
     await require('common/db/mongodb.js')();
 
+    // ========================================
+    // pool manager.
+    // ========================================
+    await require('pool/manager.js')();
   } catch (err) {
     winston.error('startup error: %s', err);
   }
