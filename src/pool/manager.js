@@ -10,6 +10,7 @@ const winston = require('winston');
 const fs = require('fs');
 const path = require('path');
 const yaml = require('js-yaml');
+const Pool = require('pool/pool');
 
 const pools = [];
 
@@ -21,7 +22,7 @@ module.exports = function () {
 
       _.forEach(configs, async entry => {
         if (!entry.enabled) return;
-        let pool = await require('pool/pool')(entry);
+        let pool = new Pool(entry);
       });
 
       return resolve();

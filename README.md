@@ -6,6 +6,7 @@ hypeengine is the next-gen successor of [CoiniumServ](https://github.com/bonesou
 
 windows only;
 * [windows build tools](https://github.com/felixrieseberg/windows-build-tools)
+* OpenSSL-Win64 [[#1]](http://slproweb.com/products/Win32OpenSSL.html) [[#2]](https://indy.fulgan.com/SSL/)
 
 ### donate
 

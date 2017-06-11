@@ -17,8 +17,11 @@
   "homepage": "https://github.com/bonesoul/hypeserv#readme",
   "dependencies": {
     "app-module-path": "^2.2.0",
+    "base58-native": "^0.1.4",
+    "bignum": "^0.12.5",
     "bluebird": "^3.5.0",
     "config": "^1.26.1",
+    "crypto": "^0.0.3",
     "glob": "^7.1.2",
     "glob-promise": "^3.1.0",
     "js-yaml": "^3.8.4",

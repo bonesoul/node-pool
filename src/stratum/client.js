@@ -9,7 +9,7 @@ var winston = require('winston');
 
 var client = module.exports = function (options) {
   var _this = this;
-
+  _this.id = options.subscriptionId; // subscription id for the client.
   _this.lastActivity = Date.now(); // last activity by the client.
   _this.difficulty = 16;
   _this.authorized = false;
@@ -25,9 +25,9 @@ var client = module.exports = function (options) {
   };
 
   _this.socket = options.socket;
-  setup();
+  setupSocket();
 
-  function setup() {
+  function setupSocket() {
     _this.socket.setEncoding('utf8'); // set the encoding.
     var buffer = ''; // our data buffer.
 
@@ -81,7 +81,36 @@ var client = module.exports = function (options) {
 
   // Handles json-rpc messages from the client
   function handleMessage(message) {
-    console.dir(message);
+    winston.debug('[STRATUM] recv: %j', message);
+
+    // check the method.
+    switch (message.method) {
+      case 'mining.subscribe':// subscription request
+        handleSubscribe(message);
+        break;
+      case 'mining.extranonce.subscribe':
+        //handleExtraNonceSubscribe(message);
+        break;
+      case 'mining.authorize':// authorization request
+        //handleAuthorize(message);
+        break;
+      case 'mining.submit':// share submission
+        _this.lastActivity = Date.now(); // update the activity for the client.
+        //handleSubmit(message);
+        break;
+      case 'mining.get_transactions':
+        //handleGetTransactions(message);
+        break;
+      case 'mining.capabilities':
+        //handleCapabilities(message);
+        break;
+      case 'mining.suggest_target':
+        //handleSuggestTarget(message);
+      default:
+        _this.emit('stratum.error', message);
+        //errorReply(message.id, errors.stratum.METHOD_NOT_FOUND);
+        break;
+    }
   };
 };
 

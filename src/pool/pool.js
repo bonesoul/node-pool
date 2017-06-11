@@ -4,10 +4,11 @@
 //
 'use strict';
 
-const Promise = require('bluebird');
 const winston = require('winston');
+const events = require('events');
+const Server = require('stratum/server');
 
-module.exports = function (config) {
+var pool = module.exports = function (config) {
   return new Promise(async (resolve, reject) => {
     try {
       winston.info('[POOL] starting %s pool..', config.name);
@@ -17,7 +18,7 @@ module.exports = function (config) {
         coin: {}
       };
 
-      let stratum = require('stratum/stratum')(context);
+      let stratum = new Server(context);
 
       return resolve();
     } catch (err) {
@@ -25,3 +26,5 @@ module.exports = function (config) {
     }
   });
 };
+
+pool.prototype.__proto__ = events.EventEmitter.prototype;

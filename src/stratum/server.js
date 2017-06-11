@@ -4,20 +4,17 @@
 //
 'use strict';
 
-const utils = require('stratum/utils.js');
+const net = require('net');
 const events = require('events');
 const winston = require('winston');
-const net = require('net');
-const client = require('stratum/client');
-
-let workers = {};
+const utils = require('stratum/utils.js');
+const Client = require('stratum/client');
 
 var stratum = module.exports = function (context) {
+  var _this = this;
+  _this.clients = {};
 
-   var _this = this;
-   _this.clients = {};
-
-   let subscriptionCounter = SubscriptionCounter(); // create a subscri.ption counter for the server that's used for assinging id's to clients.
+  let subscriptionCounter = SubscriptionCounter(); // create a subscri.ption counter for the server that's used for assinging id's to clients.
 
   // create the tcp server for stratum+tp:// connections
   let server = net.createServer({ allowHalfOpen: false }, function (socket) {
@@ -44,7 +41,7 @@ var stratum = module.exports = function (context) {
 
     socket.setKeepAlive(true); // set keep-alive on as we want a continous connection.
 
-    let worker = new client({
+    let client = new Client({
       socket: socket, // assigned socket to client's connection.
       subscriptionId: subscriptionCounter.next() // get a new subscription id for the client.
     })
@@ -59,8 +56,8 @@ var stratum = module.exports = function (context) {
       //this.sendJob(context.jobManager.current);
     })
     .on('socket.disconnect', function () {
-      delete _this.clients[client.id];
-      _this.emit('client.disconnected', client);
+      //delete _this.clients[client.id];
+      //_this.emit('client.disconnected', client);
     });
 
     _this.clients[client.id] = client;
