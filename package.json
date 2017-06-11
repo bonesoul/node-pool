@@ -1,20 +1,25 @@
 {
-  "name": "hypeserv",
+  "name": "hypeengine",
   "version": "0.0.1",
-  "description": "hypeserv",
-  "main": "src/server.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
+  "description": "hypeengine is the next-gen successor of CoiniumServ. Extending the outstanding features of CoiniumServ, hypeengine will support the modern needs for crypto-currency mining.",
+  "os": [
+    "linux",
+    "darwin",
+    "win32"
+  ],
+  "cpu": [
+    "x64",
+    "ia32"
+  ],
+  "author": "Huseyin Uslu <huseyin@int6ware.com> (http://www.int6ware.com)",
+  "homepage": "https://github.com/bonesoul/hypeengine#readme",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/bonesoul/hypeserv.git"
+    "url": "git+https://github.com/bonesoul/hypeengine.git"
   },
-  "author": "",
   "bugs": {
-    "url": "https://github.com/bonesoul/hypeserv/issues"
+    "url": "https://github.com/bonesoul/hypeengine/issues"
   },
-  "homepage": "https://github.com/bonesoul/hypeserv#readme",
   "dependencies": {
     "app-module-path": "^2.2.0",
     "base58-native": "^0.1.4",
@@ -29,5 +34,14 @@
     "mongoose": "^4.10.5",
     "pretty-error": "^2.1.0",
     "winston": "^2.3.1"
+  },
+  "devDependencies": {},
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/app.js"
+  },
+  "engines": {
+    "node": ">=8.1.0",
+    "npm": ">=5.0.3"
   }
 }

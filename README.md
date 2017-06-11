@@ -4,9 +4,29 @@ hypeengine is the next-gen successor of [CoiniumServ](https://github.com/bonesou
 ### requirements
 * node.js 8.0+
 
-windows only;
+#### osx / linux / \*nix
+* node 8.0+ will be fine.
+
+#### windows
 * [windows build tools](https://github.com/felixrieseberg/windows-build-tools)
-* OpenSSL-Win64 [[#1]](http://slproweb.com/products/Win32OpenSSL.html) [[#2]](https://indy.fulgan.com/SSL/)
+* OpenSSL-Win64 [[#1]](http://slproweb.com/products/Win32OpenSSL.html) [[#2]](https://indy.fulgan.com/SSL/) (extract to `C:\OpenSSL-Win64\`)
+
+### install
+* `git clone git@github.com:bonesoul/hypeengine.git`
+* `cd hypeengine`
+* `npm install -g grunt-cli && npm install`
+
+### running
+
+#### pm2 (production)
+
+* `npm install -g pm2`
+* `pm2 start src/server.js`
+
+#### nodemon (development)
+
+* `npm install -g nodemon`
+* `nodemon`
 
 ### donate
 
