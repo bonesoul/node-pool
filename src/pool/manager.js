@@ -23,6 +23,7 @@ module.exports = function () {
       _.forEach(configs, async entry => {
         if (!entry.enabled) return;
         let pool = new Pool(entry);
+        pools.push(pool);
       });
 
       return resolve();
