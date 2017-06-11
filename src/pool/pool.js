@@ -1,5 +1,5 @@
 //
-//     hypeserv
+//     hypeengine
 //     Copyright (C) 2013 - 2017, Hüseyin Uslu, Int6ware - http://www.int6ware.com
 //
 'use strict';
@@ -11,7 +11,13 @@ module.exports = function (config) {
   return new Promise(async (resolve, reject) => {
     try {
       winston.info('[POOL] starting %s pool..', config.name);
-      let stratum = require('stratum/stratum')();
+
+      let context = {
+        config: config,
+        coin: {}
+      };
+
+      let stratum = require('stratum/stratum')(context);
 
       return resolve();
     } catch (err) {
