@@ -6,6 +6,7 @@
 
 const winston = require('winston');
 const events = require('events');
+const _ = require('lodash');
 const Server = require('stratum/server');
 const Daemon = require('daemon/daemon');
 const errors = require('daemon/errors');
@@ -18,16 +19,27 @@ var pool = module.exports = function (config) {
   _this.context = {
     config: config,
     coin: {
+      coinVersion: null,
+      protocolVersion: null,
+      walletVersion: null,
       capatabilities: {
         submitBlockSupported: null
       }
     },
     network: {
-      difficulty: null
+      testnet: null,
+      connections: null,
+      errors: null,
+      difficulty: null,
+      hashRate: null
     },
     wallet: {
       central: null
-    }
+    },
+    fees: {
+      percent: 0, // total percent of pool fees.
+      recipients: [], // recipients of fees.
+    },
   };
 
   startup();
@@ -35,9 +47,11 @@ var pool = module.exports = function (config) {
   async function startup() {
     _this.context.daemon = await setupDaemon(_this.context.config.daemon); // start daemon connection.
     _this.context.coin.capatabilities.submitBlockSupported = await detectSubmitBlock(); // get coin capatabilities.
-    _this.context.wallet.central = await validatePoolAddress();
-
-    console.dir(_this.context);
+    _this.context.wallet.central = await validatePoolAddress(); // validate central pool address.
+    await readNetworkInfo();    
+    await waitBlockChainSync(); // wait for blockchain synchronization.
+    await setupRecipients();
+    await startManagers();
 
     winston.info('[COIN] submitblock: %s, difficulty: %d', _this.context.coin.capatabilities.submitBlockSupported, _this.context.network.difficulty);
     //let stratum = new Server(context);
@@ -107,8 +121,131 @@ var pool = module.exports = function (config) {
       }
     });
   }
-};
 
+  // reads coin's network information.
+  function readNetworkInfo() {
+    return new Promise(async (resolve, reject) => {
+      try {
+        let calls = [
+            ['getinfo', []],
+            ['getmininginfo', []]
+        ];
+
+        // make a batch call of getinfo() and getmininginfo()
+        _this.context.daemon.batch(calls, function (error, responses) {
+          var results = [];
+          responses.forEach(function (response, index) {
+            // catch any rpc errors.
+            if (response.error)
+              return reject(`Pool initilization failed as rpc call '${call}' failed: ${response.error.message}`);
+
+            var call = calls[index][0];
+            results[call] = response.result;
+          });
+
+          // set the data.
+          _this.context.coin.coinVersion = results.getinfo.version;
+          _this.context.coin.protocolVersion = results.getinfo.protocolversion;
+          _this.context.coin.walletVersion = results.getinfo.walletversion;
+          _this.context.network.testnet = results.getinfo.testnet;
+          _this.context.network.connections = results.getinfo.connections;
+          _this.context.network.errors = results.getinfo.errors;
+          _this.context.network.difficulty = results.getmininginfo.difficulty;
+          _this.context.network.hashRate = results.getmininginfo.networkhashps;
+
+          return resolve();
+        });
+      } catch (err) {
+        return reject(err);
+      }
+    });
+  };
+
+  // awaits for the block chain synchronization.
+  function waitBlockChainSync() {
+    return new Promise(async (resolve, reject) => {
+      try {
+        // getblocktemplate() will fail if coin daemon still sync blocks from the network.
+        // we'll be using it with getinfo() and getpeerinfo() together to see if we are synced with the network.
+
+        var recheck = function () {
+          let calls = [
+            ['getblocktemplate', []],
+            ['getinfo', []],
+            ['getpeerinfo', []],
+          ];
+
+          _this.context.daemon.batch(calls, function (error, responses) {
+            var results = [];
+            responses.forEach(function (response, index) {
+              // catch any rpc errors.
+              if (response.error)
+                return reject(`Pool initilization failed as rpc call '${call}' failed: ${response.error.message}`);
+
+              var call = calls[index][0];
+              results[call] = response.result;
+            });
+
+            let synced = !results.getblocktemplate.error || results.getblocktemplate.error.code !== errors.Rpc.CLIENT_IN_INITIAL_DOWNLOAD;
+            if (synced) return resolve();
+
+            setTimeout(recheck, 5000); // re-schedule recheck().
+
+            var blockCount = results.getinfo.blocks;
+            var peers = results.getpeerinfo;
+            var sorted = peers.sort(function (a, b) {
+                return b.startingheight - a.startingheight;
+            });
+
+            var longestChain = sorted[0].startingheight;
+            var percent = (blockCount / longestChain * 100).toFixed(2);
+
+            winston.warn(`Waiting for block chain syncronization, downloaded ${percent}% from ${peers.length} peers.`);
+          });
+        };
+
+        recheck();
+      } catch (err) {
+        return reject(err);
+      }
+    });
+  };
+
+  // reads coin's network information.
+  function setupRecipients() {
+    return new Promise(async (resolve, reject) => {
+      try {
+        _.forEach(_this.context.config.rewards, (percent, address) => {
+          let recipient = {
+              percent: percent / 100,
+              script: utils.addressToScript(address)
+          };
+
+          _this.context.fees.recipients.push(recipient);
+          _this.context.fees.percent += percent;
+        });
+
+        if (_this.context.fees.percent === 0)
+          winston.warn('Your pool is configured with 0% fees!');
+
+        return resolve();
+      } catch (err) {
+        return reject(err);
+      }
+    });
+  };
+
+  // start managers.
+  function startManagers() {
+    return new Promise(async (resolve, reject) => {
+      try {
+
+      } catch (err) {
+        return reject(err);
+      }
+    });
+  };
+};
 
 // detect coin features.
 /*function checkCoinFeatures(daemon) {
