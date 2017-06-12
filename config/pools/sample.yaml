@@ -1,13 +1,14 @@
 enabled: true
 name: dogecoin
 
-coin:
-  config: dogecoin
-  daemon:
-    host: 127.0.0.1
-    port: 9333
-    user: testuser
-    password: testpass
+daemon:
+  host: 127.0.0.1
+  port: 9333
+  user: testuser
+  password: testpass
+
+wallet:
+  address: nib2LgCtNghgojBiz6Ynu8jWaWHjLFiL47
 
 stratum:
   bind: 0.0.0.0

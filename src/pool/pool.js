@@ -9,6 +9,7 @@ const events = require('events');
 const Server = require('stratum/server');
 const Daemon = require('daemon/daemon');
 const errors = require('daemon/errors');
+const utils = require('common/utils.js');
 
 var pool = module.exports = function (config) {
   var _this = this;
@@ -23,18 +24,26 @@ var pool = module.exports = function (config) {
     },
     network: {
       difficulty: null
+    },
+    wallet: {
+      central: null
     }
   };
 
   startup();
 
   async function startup() {
-    _this.context.daemon = await setupDaemon(_this.context.config.coin.daemon); // start daemon connection.
+    _this.context.daemon = await setupDaemon(_this.context.config.daemon); // start daemon connection.
     _this.context.coin.capatabilities.submitBlockSupported = await detectSubmitBlock(); // get coin capatabilities.
+    _this.context.wallet.central = await validatePoolAddress();
 
+    console.dir(_this.context);
+
+    winston.info('[COIN] submitblock: %s, difficulty: %d', _this.context.coin.capatabilities.submitBlockSupported, _this.context.network.difficulty);
     //let stratum = new Server(context);
   };
 
+  // starts up the daemon connection
   function setupDaemon() {
     return new Promise(async (resolve, reject) => {
       try {
@@ -43,7 +52,7 @@ var pool = module.exports = function (config) {
           return reject('No coin daemons have been configured. Pool initialization failed..')
         }
 
-        let daemon = new Daemon(_this.context.config.coin.daemon);
+        let daemon = new Daemon(_this.context.config.daemon);
 
         // wait until daemon interface reports that we are online (got connected to daemon succesfully).
         daemon.once('online', function () {
@@ -55,6 +64,7 @@ var pool = module.exports = function (config) {
     });
   };
 
+  // detects if the coin supports submitblock() call.
   function detectSubmitBlock() {
     return new Promise(async (resolve, reject) => {
       try {
@@ -71,10 +81,36 @@ var pool = module.exports = function (config) {
         return reject(err);
       }
     });
+  };
+
+  // validates the configured pool address for recieving mined blocks.
+  function validatePoolAddress() {
+    return new Promise(async (resolve, reject) => {
+      try {
+        _this.context.daemon.cmd('validateaddress', [_this.context.config.wallet.address], function (error, response) {
+          let result = response.result;
+
+          if (response.error)
+            return reject(`Pool initilization failed as rpc call validateaddress() call failed: ${response.error.message}`);
+
+          // make sure configured address is valid.
+          if (!result.isvalid || !result.ismine)
+            return reject(`Pool initilization failed as configured pool address '${_this.context.config.wallet.address}' is not owned by the connected wallet.`);
+
+          // get the script for the pool address.
+          result.script = utils.addressToScript(result.address); // pure pow coins just use the address within the coinbase transaction.
+
+          return resolve(result);
+        });
+      } catch (err) {
+        return reject(err);
+      }
+    });
   }
 };
 
 
+// detect coin features.
 /*function checkCoinFeatures(daemon) {
   return new Promise(async (resolve, reject) => {
     try {

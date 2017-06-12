@@ -7,7 +7,7 @@
 const net = require('net');
 const events = require('events');
 const winston = require('winston');
-const utils = require('stratum/utils.js');
+const utils = require('common/utils.js');
 const Client = require('stratum/client');
 
 var stratum = module.exports = function (context) {
