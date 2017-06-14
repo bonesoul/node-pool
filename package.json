@@ -21,19 +21,19 @@
     "url": "https://github.com/bonesoul/hypeengine/issues"
   },
   "dependencies": {
-    "app-module-path": "^2.2.0",
-    "base58-native": "^0.1.4",
-    "bignum": "^0.12.5",
-    "bluebird": "^3.5.0",
-    "config": "^1.26.1",
-    "crypto": "^0.0.3",
-    "glob": "^7.1.2",
-    "glob-promise": "^3.1.0",
-    "js-yaml": "^3.8.4",
-    "lodash": "^4.17.4",
-    "mongoose": "^4.10.5",
-    "pretty-error": "^2.1.0",
-    "winston": "^2.3.1"
+    "app-module-path": "2.2.0",
+    "base58-native": "0.1.4",
+    "bignum": "0.12.5",
+    "bluebird": "3.5.0",
+    "config": "1.26.1",
+    "crypto": "0.0.3",
+    "glob": "7.1.2",
+    "glob-promise": "3.1.0",
+    "js-yaml": "3.8.4",
+    "lodash": "4.17.4",
+    "mongoose": "4.10.5",
+    "pretty-error": "2.1.0",
+    "winston": "2.3.1"
   },
   "devDependencies": {
     "eslint": "4.0.0",
@@ -42,18 +42,25 @@
     "eslint-plugin-mocha": "4.10.1",
     "eslint-plugin-node": "5.0.0",
     "eslint-plugin-promise": "3.5.0",
+    "istanbul": "1.1.0-alpha.1",
     "grunt": "1.0.1",
     "grunt-eslint": "20.0.0",
+    "grunt-mocha-test": "0.13.2",
+    "grunt-shell": "2.1.0",
+    "mocha": "3.4.2",
+    "mochawesome": "2.2.1",
     "load-grunt-tasks": "3.5.2",
     "time-grunt": "1.4.0",
-    "semistandard": "11.0.0"
+    "semistandard": "11.0.0",
+    "snazzy": "7.0.0"
   },
   "main": "src/server.js",
   "scripts": {
-    "start": "node src/app.js"
+    "start": "node src/server.js",
+    "cover": "node_modules/.bin/istanbul cover node_modules/mocha/bin/_mocha --dir ./build/coverage/ -- --reporter dot test/**/*.js"
   },
   "engines": {
-    "node": ">=8.1.0",
+    "node": ">=8.1.1",
     "npm": ">=5.0.3"
   }
 }

@@ -2,10 +2,10 @@
 hypeengine is the next-gen successor of [CoiniumServ](https://github.com/bonesoul/coiniumserv). Extending the outstanding features of CoiniumServ, hypeengine will support the modern needs for crypto-currency mining.
 
 ### requirements
-* node.js 8.0+
+* node.js 8.1.1+
 
 #### osx / linux / \*nix
-* node 8.0+ will be fine.
+* node 8.1.1+ will be fine.
 
 #### windows
 * [windows build tools](https://github.com/felixrieseberg/windows-build-tools)

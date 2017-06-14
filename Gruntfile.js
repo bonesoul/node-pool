@@ -9,6 +9,22 @@ module.exports = function (grunt) {
 
   grunt.initConfig({
     pkg: grunt.file.readJSON('package.json'),
+    shell: {
+      semistandard: 'semistandard src/**/*.js --verbose | snazzy',
+      cover: 'npm run cover'
+    },    
+    mochaTest: {
+      options: {
+        reporter: 'mochawesome',
+        reporterOptions: {
+          reportDir: 'build/test/mocha/',
+          reportName: 'result',
+          inlineAssets: true
+        },
+        quiet: false
+      },
+      src: ['test/**/*.js']
+    },
     eslint: {
       target: ['src/**/*.js', 'assets/js/**/*.js', 'test/**/*.js', 'contrib/**/*.js'],
       options: {
@@ -25,7 +41,9 @@ module.exports = function (grunt) {
   require('load-grunt-tasks')(grunt);
 
   // tasks.
-  //grunt.registerTask('test', ['mochaTest']);
+  grunt.registerTask('test', ['mochaTest']);
   grunt.registerTask('lint', ['eslint']);
-  grunt.registerTask('default', ['lint']);
+  grunt.registerTask('cover', 'shell:cover');
+  grunt.registerTask('semistandard', 'shell:semistandard');
+  grunt.registerTask('default', ['test']);
 };
