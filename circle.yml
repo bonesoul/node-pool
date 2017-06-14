@@ -16,7 +16,8 @@ test:
   override:
     - grunt test
     - grunt lint
-
+    - npm run cover
+    
 general:
   artifacts:
     - logs/
