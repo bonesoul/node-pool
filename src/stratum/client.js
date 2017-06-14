@@ -20,14 +20,14 @@ var client = module.exports = function (options) {
 
   // number of shares submissions by the client - used by ban manager to evaluate a ban.
   _this.shares = {
-      valid: 0, // valid shares counter
-      invalid: 0 // invalid shares counter.
+    valid: 0, // valid shares counter
+    invalid: 0 // invalid shares counter.
   };
 
   _this.socket = options.socket;
   setupSocket();
 
-  function setupSocket() {
+  function setupSocket () {
     _this.socket.setEncoding('utf8'); // set the encoding.
     var buffer = ''; // our data buffer.
 
@@ -36,10 +36,10 @@ var client = module.exports = function (options) {
 
       // check for flooded socket - only allow a maximum of 10 KB of data.
       if (Buffer.byteLength(buffer, 'utf8') > 10240) {
-          buffer = '';
-          _this.emit('socket.flooded');
-          socket.destroy();
-          return;
+        buffer = '';
+        _this.emit('socket.flooded');
+        _this.socket.destroy();
+        return;
       }
 
       // check for a new message
@@ -47,71 +47,72 @@ var client = module.exports = function (options) {
         var messages = buffer.split('\n'); // get the messages.
         var incomplete = buffer.slice(-1) === '\n' ? '' : messages.pop(); // make sure to keep existing incomplete message if any.
 
-         messages.forEach(function (message) {
-           if (message === '') return; // skip empty lines
+        messages.forEach(function (message) {
+          if (message === '') return; // skip empty lines
 
-            // try to parse the message as json.
-            var json;
+          // try to parse the message as json.
+          var json;
 
-            try {
-              json = JSON.parse(message);
-            } catch (e) {
-              /* destroy connections that submit messages we can't handle */
-              _this.emit('protocol.error', message);
-              socket.destroy();
-              return;
-            }
+          try {
+            json = JSON.parse(message);
+          } catch (e) {
+            /* destroy connections that submit messages we can't handle */
+            _this.emit('protocol.error', message);
+            _this.socket.destroy();
+            return;
+          }
 
-            // if we do have a valid json message
-            if (json) {
-                handleMessage(json);
-            }
-         });
+          // if we do have a valid json message
+          if (json) {
+            handleMessage(json);
+          }
+        });
 
-         buffer = incomplete; // keep the incomplete data in buffer.
+        buffer = incomplete; // keep the incomplete data in buffer.
       }
     })
-    .on('close', function () {
+      .on('close', function () {
         _this.emit('socket.disconnect');
-    })
-    .on('error', function (err) {
+      })
+      .on('error', function (err) {
         if (err.code !== 'ECONNRESET') _this.emit('socket.error', err);
-    });
-  };
+      });
+  }
 
   // Handles json-rpc messages from the client
-  function handleMessage(message) {
+  function handleMessage (message) {
     winston.debug('[STRATUM] recv: %j', message);
 
     // check the method.
     switch (message.method) {
-      case 'mining.subscribe':// subscription request
-        handleSubscribe(message);
+      case 'mining.subscribe': // subscription request
+        // handleSubscribe(message);
         break;
       case 'mining.extranonce.subscribe':
-        //handleExtraNonceSubscribe(message);
+        // handleExtraNonceSubscribe(message)
         break;
-      case 'mining.authorize':// authorization request
-        //handleAuthorize(message);
+      case 'mining.authorize': // authorization request
+        // handleAuthorize(message)
         break;
-      case 'mining.submit':// share submission
+      case 'mining.submit': // share submission
         _this.lastActivity = Date.now(); // update the activity for the client.
-        //handleSubmit(message);
+        // handleSubmit(message)
         break;
       case 'mining.get_transactions':
-        //handleGetTransactions(message);
+        // handleGetTransactions(message)
         break;
       case 'mining.capabilities':
-        //handleCapabilities(message);
+        // handleCapabilities(message)
         break;
       case 'mining.suggest_target':
-        //handleSuggestTarget(message);
+        // handleSuggestTarget(message)
+        break;
       default:
         _this.emit('stratum.error', message);
-        //errorReply(message.id, errors.stratum.METHOD_NOT_FOUND);
+        // errorReply(message.id, errors.stratum.METHOD_NOT_FOUND)
         break;
     }
-  };
+  }
 };
 
 client.prototype.__proto__ = events.EventEmitter.prototype;

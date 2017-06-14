@@ -7,6 +7,7 @@
 const winston = require('winston');
 const events = require('events');
 const _ = require('lodash');
+const Promise = require('bluebird');
 const StratumServer = require('stratum/server');
 const Daemon = require('daemon/daemon');
 const ShareManager = require('pool/managers/share');
@@ -41,13 +42,13 @@ var pool = module.exports = function (config) {
     },
     fees: {
       percent: 0, // total percent of pool fees.
-      recipients: [], // recipients of fees.
-    },
+      recipients: [] // recipients of fees.
+    }
   };
 
   startup();
 
-  async function startup() {
+  async function startup () {
     _this.context.daemon = await setupDaemon(_this.context.config.daemon); // start daemon connection.
     _this.context.coin.capatabilities.submitBlockSupported = await detectSubmitBlock(); // get coin capatabilities.
     _this.context.wallet.central = await validatePoolAddress(); // validate central pool address.
@@ -59,15 +60,15 @@ var pool = module.exports = function (config) {
 
     winston.info('[COIN] submitblock: %s, difficulty: %d', _this.context.coin.capatabilities.submitBlockSupported, _this.context.network.difficulty);
     winston.info('[POOL] startup done..');
-  };
+  }
 
   // starts up the daemon connection
-  function setupDaemon() {
+  function setupDaemon () {
     return new Promise(async (resolve, reject) => {
       try {
-        if (typeof (_this.context.config) == 'undefined') {
+        if (typeof (_this.context.config) === 'undefined') {
           // make sure we have been supplied a daemon configuration.
-          return reject('No coin daemons have been configured. Pool initialization failed..')
+          return reject(new Error('No coin daemons have been configured. Pool initialization failed..'));
         }
 
         let daemon = new Daemon(_this.context.config.daemon);
@@ -80,40 +81,36 @@ var pool = module.exports = function (config) {
         return reject(err);
       }
     });
-  };
+  }
 
   // detects if the coin supports submitblock() call.
-  function detectSubmitBlock() {
+  function detectSubmitBlock () {
     return new Promise(async (resolve, reject) => {
       try {
         // issue a submitblock() call too see if it's supported.
         _this.context.daemon.cmd('submitblock', ['invalid-hash'], function (error, response) {
           // If the coin supports the submitblock() call it's should return a DESERIALIZATION_ERROR (-22) - 'Block decode failed'
           // Otherwise if it doesn't support the call, it should return a METHOD_NOT_FOUND(-32601) - 'Method not found' error.
-          if (error.code === errors.Rpc.DESERIALIZATION_ERROR) // the coin supports submitblock().
-            return resolve(true);
-          else if (error.code === errors.Rpc.METHOD_NOT_FOUND) // the coin doesn't have submitblock() method.
-            return resolve(false);
+          if (error.code === errors.Rpc.DESERIALIZATION_ERROR) return resolve(true); // the coin supports submitblock().
+          else if (error.code === errors.Rpc.METHOD_NOT_FOUND) return resolve(false); // the coin doesn't have submitblock() method.
         });
       } catch (err) {
         return reject(err);
       }
     });
-  };
+  }
 
   // validates the configured pool address for recieving mined blocks.
-  function validatePoolAddress() {
+  function validatePoolAddress () {
     return new Promise(async (resolve, reject) => {
       try {
         _this.context.daemon.cmd('validateaddress', [_this.context.config.wallet.address], function (error, response) {
+          if (error) return reject(new Error(`Pool initilization failed as rpc call validateaddress() call failed: ${response.error.message}`));
+
           let result = response.result;
 
-          if (response.error)
-            return reject(`Pool initilization failed as rpc call validateaddress() call failed: ${response.error.message}`);
-
           // make sure configured address is valid.
-          if (!result.isvalid || !result.ismine)
-            return reject(`Pool initilization failed as configured pool address '${_this.context.config.wallet.address}' is not owned by the connected wallet.`);
+          if (!result.isvalid || !result.ismine) return reject(new Error(`Pool initilization failed as configured pool address '${_this.context.config.wallet.address}' is not owned by the connected wallet.`));
 
           // get the script for the pool address.
           result.script = utils.addressToScript(result.address); // pure pow coins just use the address within the coinbase transaction.
@@ -127,23 +124,23 @@ var pool = module.exports = function (config) {
   }
 
   // reads coin's network information.
-  function readNetworkInfo() {
+  function readNetworkInfo () {
     return new Promise(async (resolve, reject) => {
       try {
         let calls = [
-            ['getinfo', []],
-            ['getmininginfo', []]
+          ['getinfo', []],
+          ['getmininginfo', []]
         ];
 
         // make a batch call of getinfo() and getmininginfo()
         _this.context.daemon.batch(calls, function (error, responses) {
+          if (error) return reject(new Error(`Error reading network info`));
+
           var results = [];
           responses.forEach(function (response, index) {
-            // catch any rpc errors.
-            if (response.error)
-              return reject(`Pool initilization failed as rpc call '${call}' failed: ${response.error.message}`);
-
             var call = calls[index][0];
+            if (response.error) return reject(new Error(`Pool initilization failed as rpc call '${call}' failed: ${response.error.message}`)); // catch any rpc errors.
+
             results[call] = response.result;
           });
 
@@ -163,10 +160,10 @@ var pool = module.exports = function (config) {
         return reject(err);
       }
     });
-  };
+  }
 
   // awaits for the block chain synchronization.
-  function waitBlockChainSync() {
+  function waitBlockChainSync () {
     return new Promise(async (resolve, reject) => {
       try {
         // getblocktemplate() will fail if coin daemon still sync blocks from the network.
@@ -176,17 +173,17 @@ var pool = module.exports = function (config) {
           let calls = [
             ['getblocktemplate', []],
             ['getinfo', []],
-            ['getpeerinfo', []],
+            ['getpeerinfo', []]
           ];
 
           _this.context.daemon.batch(calls, function (error, responses) {
+            if (error) return reject(new Error(`Error reading network info`));
+
             var results = [];
             responses.forEach(function (response, index) {
-              // catch any rpc errors.
-              if (response.error)
-                return reject(`Pool initilization failed as rpc call '${call}' failed: ${response.error.message}`);
-
               var call = calls[index][0];
+              if (response.error) return reject(new Error(`Pool initilization failed as rpc call '${call}' failed: ${response.error.message}`)); // catch any rpc errors.
+
               results[call] = response.result;
             });
 
@@ -198,13 +195,13 @@ var pool = module.exports = function (config) {
             var blockCount = results.getinfo.blocks;
             var peers = results.getpeerinfo;
             var sorted = peers.sort(function (a, b) {
-                return b.startingheight - a.startingheight;
+              return b.startingheight - a.startingheight;
             });
 
             var longestChain = sorted[0].startingheight;
             var percent = (blockCount / longestChain * 100).toFixed(2);
 
-            winston.warn(`Waiting for block chain syncronization, downloaded ${percent}% from ${peers.length} peers.`);
+            winston.warn(new Error(`Waiting for block chain syncronization, downloaded ${percent}% from ${peers.length} peers.`));
           });
         };
 
@@ -213,34 +210,33 @@ var pool = module.exports = function (config) {
         return reject(err);
       }
     });
-  };
+  }
 
   // reads coin's network information.
-  function setupRecipients() {
+  function setupRecipients () {
     return new Promise(async (resolve, reject) => {
       try {
         _.forEach(_this.context.config.rewards, (percent, address) => {
           let recipient = {
-              percent: percent / 100,
-              script: utils.addressToScript(address)
+            percent: percent / 100,
+            script: utils.addressToScript(address)
           };
 
           _this.context.fees.recipients.push(recipient);
           _this.context.fees.percent += percent;
         });
 
-        if (_this.context.fees.percent === 0)
-          winston.warn('Your pool is configured with 0% fees!');
+        if (_this.context.fees.percent === 0) winston.warn('Your pool is configured with 0% fees!');
 
         return resolve();
       } catch (err) {
         return reject(err);
       }
     });
-  };
+  }
 
   // start managers.
-  function startManagers() {
+  function startManagers () {
     return new Promise(async (resolve, reject) => {
       try {
         _this.context.shareManager = new ShareManager();
@@ -251,9 +247,9 @@ var pool = module.exports = function (config) {
         return reject(err);
       }
     });
-  };
+  }
 
-  function startStratumServer() {
+  function startStratumServer () {
     return new Promise(async (resolve, reject) => {
       try {
         _this.context.server = new StratumServer(_this.context)
@@ -267,7 +263,7 @@ var pool = module.exports = function (config) {
         return reject(err);
       }
     });
-  };
+  }
 };
 
 pool.prototype.__proto__ = events.EventEmitter.prototype;

@@ -33,7 +33,7 @@ module.exports = function () {
   });
 };
 
-function discover() {
+function discover () {
   return new Promise(async (resolve, reject) => {
     try {
       let poolConfigDir = 'config/pools/';
@@ -46,8 +46,7 @@ function discover() {
         let file = path.join(poolConfigDir, entry);
 
         // make sure the file exists and is a json file
-        if (!fs.existsSync(file) || path.extname(file) !== '.yaml')
-          return;
+        if (!fs.existsSync(file) || path.extname(file) !== '.yaml') return;
 
         // read the config.
         let data = yaml.safeLoad(fs.readFileSync(file, 'utf8'));

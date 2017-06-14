@@ -9,6 +9,7 @@ const config = require('config');
 const os = require('os');
 const path = require('path');
 const winston = require('winston');
+const Promise = require('bluebird');
 const packageInfo = require('../package.json');
 
 async function startup () {
