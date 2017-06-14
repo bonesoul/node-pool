@@ -1,0 +1,36 @@
+env:
+  node: true
+  es6: true
+  jquery: false
+  browser: false
+
+plugins:
+  - import
+  - promise
+  - mocha
+  - node
+
+extends:
+  - eslint:recommended
+  - semistandard
+  - plugin:import/errors
+  - plugin:import/warnings
+
+rules:
+  promise/always-return: error
+  promise/no-return-wrap: error
+  promise/param-names: error
+  promise/catch-or-return: error
+  promise/no-native: warn
+  promise/no-nesting: warn
+  promise/no-promise-in-callback: warn
+  promise/no-callback-in-promise: warn
+  mocha/no-exclusive-tests: error
+  mocha/no-pending-tests: error
+  mocha/handle-done-callback: error
+  mocha/no-identical-title: error
+  mocha/max-top-level-suites: error
+  mocha/no-nested-tests: error
+  node/no-deprecated-api: error
+  node/process-exit-as-throw: error
+  node/no-unsupported-features: error

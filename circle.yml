@@ -1,0 +1,23 @@
+machine:
+
+  node:
+    version: 8.1.1
+
+  environment:
+    NODE_ENV: test
+    NODE_PENDING_DEPRECATION: 1
+
+dependencies:
+  override:
+    - yarn global add grunt-cli
+    - yarn install
+
+test:
+  override:
+    - grunt test
+    - grunt lint
+
+general:
+  artifacts:
+    - logs/
+    - build/
