@@ -1,4 +1,7 @@
 # hypeengine
+
+dev: &nbsp; &nbsp; &nbsp; &nbsp;[![js-semistandard-style](https://img.shields.io/badge/code%20style-semistandard-brightgreen.svg?style=flat-square)](https://github.com/Flet/semistandard) [![CircleCI](https://circleci.com/gh/bonesoul/hypeengine/tree/develop.svg?style=svg&circle-token=926a8d7960f4626cc748baa0ac647a7e13c7ea8d)](https://circleci.com/gh/bonesoul/hypeengine/tree/develop)
+
 hypeengine is the next-gen successor of [CoiniumServ](https://github.com/bonesoul/coiniumserv). Extending the outstanding features of CoiniumServ, hypeengine will support the modern needs for crypto-currency mining.
 
 ### requirements
