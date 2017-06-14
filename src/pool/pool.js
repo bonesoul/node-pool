@@ -7,8 +7,11 @@
 const winston = require('winston');
 const events = require('events');
 const _ = require('lodash');
-const Server = require('stratum/server');
+const StratumServer = require('stratum/server');
 const Daemon = require('daemon/daemon');
+const ShareManager = require('pool/managers/share');
+const BlockManager = require('pool/managers/block');
+const JobManager = require('pool/managers/job');
 const errors = require('daemon/errors');
 const utils = require('common/utils.js');
 
@@ -48,13 +51,14 @@ var pool = module.exports = function (config) {
     _this.context.daemon = await setupDaemon(_this.context.config.daemon); // start daemon connection.
     _this.context.coin.capatabilities.submitBlockSupported = await detectSubmitBlock(); // get coin capatabilities.
     _this.context.wallet.central = await validatePoolAddress(); // validate central pool address.
-    await readNetworkInfo();    
+    await readNetworkInfo(); // read network info.
     await waitBlockChainSync(); // wait for blockchain synchronization.
-    await setupRecipients();
-    await startManagers();
+    await setupRecipients(); // setup pool's fee recipients.
+    await startManagers(); // startup managers.
+    await startStratumServer(); // startup stratum server.
 
     winston.info('[COIN] submitblock: %s, difficulty: %d', _this.context.coin.capatabilities.submitBlockSupported, _this.context.network.difficulty);
-    //let stratum = new Server(context);
+    winston.info('[POOL] startup done..');
   };
 
   // starts up the daemon connection
@@ -239,27 +243,31 @@ var pool = module.exports = function (config) {
   function startManagers() {
     return new Promise(async (resolve, reject) => {
       try {
+        _this.context.shareManager = new ShareManager();
+        _this.context.blockManager = new BlockManager();
+        _this.context.jobManager = new JobManager();
+        return resolve();
+      } catch (err) {
+        return reject(err);
+      }
+    });
+  };
 
+  function startStratumServer() {
+    return new Promise(async (resolve, reject) => {
+      try {
+        _this.context.server = new StratumServer(_this.context)
+          .on('client.connected', function (client) {
+            winston.info('client connected');
+          })
+          .on('server.started', function () {
+            return resolve();
+          });
       } catch (err) {
         return reject(err);
       }
     });
   };
 };
-
-// detect coin features.
-/*function checkCoinFeatures(daemon) {
-  return new Promise(async (resolve, reject) => {
-    try {
-      // Use getdifficulty() to determine if we are connected to POS + POW hybrid coin.
-      daemon.cmd('getdifficulty', [], function (error, response) {
-        if (error) return reject(error);
-        return resolve(response.result);
-      });
-    } catch (err) {
-      return reject(err);
-    }
-  });
-};*/
 
 pool.prototype.__proto__ = events.EventEmitter.prototype;

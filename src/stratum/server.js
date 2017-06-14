@@ -19,7 +19,6 @@ var stratum = module.exports = function (context) {
   // create the tcp server for stratum+tp:// connections
   let server = net.createServer({ allowHalfOpen: false }, function (socket) {
     handleConnection(socket); // handle the new connection
-    _this.emit('server.started');
   });
 
   server.maxConnections = 1000000;  // set max connections to as much as possible.
@@ -27,6 +26,7 @@ var stratum = module.exports = function (context) {
   // start listening for connections
   server.listen(context.config.stratum.port, function () {
     winston.log('info', '[STRATUM] listening on %s:%d', server.address().address, server.address().port);
+    _this.emit('server.started');
   })
   .on('error', function (err) {
     if (err.code == 'EADDRINUSE')
