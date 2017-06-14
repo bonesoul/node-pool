@@ -88,9 +88,9 @@ var pool = module.exports = function (config) {
     return new Promise(async (resolve, reject) => {
       try {
         // issue a submitblock() call too see if it's supported.
+        // If the coin supports the submitblock() call it's should return a DESERIALIZATION_ERROR (-22) - 'Block decode failed'
+        // Otherwise if it doesn't support the call, it should return a METHOD_NOT_FOUND(-32601) - 'Method not found' error.
         _this.context.daemon.cmd('submitblock', ['invalid-hash'], function (error, response) {
-          // If the coin supports the submitblock() call it's should return a DESERIALIZATION_ERROR (-22) - 'Block decode failed'
-          // Otherwise if it doesn't support the call, it should return a METHOD_NOT_FOUND(-32601) - 'Method not found' error.
           if (error.code === errors.Rpc.DESERIALIZATION_ERROR) return resolve(true); // the coin supports submitblock().
           else if (error.code === errors.Rpc.METHOD_NOT_FOUND) return resolve(false); // the coin doesn't have submitblock() method.
         });
